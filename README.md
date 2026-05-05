@@ -1,2 +1,1 @@
-# kivo-core
-Kivo
+v3.3 - FULL BUILD. Unzip and upload individual items to GitHub kivo-core repository.

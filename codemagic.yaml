@@ -1,0 +1,17 @@
+# Codemagic CI/CD Configuration v3.3
+workflows:
+  gcp-serverless-deploy:
+    name: KiVo Santa Cruz Pilot Deployment
+    environment:
+      groups:
+        - google_credentials
+    scripts:
+      - name: Pre-build Optimization
+        script: |
+          chmod +x ./scripts/image_optimizer.sh
+          ./scripts/image_optimizer.sh
+          flutter pub get
+      - name: Build and Deploy
+        script: |
+          echo $GCLOUD_SERVICE_ACCOUNT_KEY | gcloud auth activate-service-account --key-file=-
+          # Deployment commands...

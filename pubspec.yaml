@@ -1,0 +1,11 @@
+name: kivo_global
+description: High-Efficiency Fintech for Santa Cruz.
+version: 1.0.0+1
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_image_compress: ^2.1.0
+  http: ^1.1.0
+  provider: ^6.0.0
