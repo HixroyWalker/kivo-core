@@ -1,17 +1,32 @@
-# Codemagic CI/CD Configuration v3.3
+
 workflows:
   gcp-serverless-deploy:
     name: KiVo Santa Cruz Pilot Deployment
+    instance_type: linux_x2
+    max_build_duration: 30
     environment:
       groups:
-        - google_credentials
+        - google_credentials # Ensure GCLOUD_SERVICE_ACCOUNT_KEY is in this group in Codemagic UI
     scripts:
-      - name: Pre-build Optimization
+      - name: Repair Project and Auth
         script: |
-          chmod +x ./scripts/image_optimizer.sh
-          ./scripts/image_optimizer.sh
+          # Create missing folders for Android/iOS
+          flutter create . --platforms=android,ios
           flutter pub get
-      - name: Build and Deploy
+          
+          # Auth with Google Cloud using the secret key
+          echo "$GCLOUD_SERVICE_ACCOUNT_KEY" > gcp_key.json
+          gcloud auth activate-service-account 528782602565-compute@developer.gserviceaccount.com --key-file=gcp_key.json --project=alert-basis-134223
+          
+      - name: Build and Deploy Backend
         script: |
-          echo $GCLOUD_SERVICE_ACCOUNT_KEY | gcloud auth activate-service-account --key-file=-
-          # Deployment commands...
+          gcloud auth configure-docker --quiet
+          docker build -t gcr.io/alert-basis-134223/kivo-backend:latest -f backend/Dockerfile ./backend
+          docker push gcr.io/alert-basis-134223/kivo-backend:latest
+          
+          gcloud run deploy kivo-service \
+            --image gcr.io/alert-basis-134223/kivo-backend:latest \
+            --platform managed \
+            --region us-central1 \
+            --allow-unauthenticated \
+            --project=alert-basis-134223
