@@ -1,34 +1,28 @@
-
 steps:
-  # Build the Docker image
+  # Step 1: Build the container image
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'build', 
-      '-t', 'gcr.io/alert-basis-134223/kivo-backend:latest', 
-      '-f', 'backend/Dockerfile', 
-      './backend'
+      '-t', 'gcr.io/$PROJECT_ID/kivo-backend:latest', 
+      '-f', 'Dockerfile', 
+      '.'
     ]
 
-  # Push to Registry
+  # Step 2: Push the image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/alert-basis-134223/kivo-backend:latest']
+    args: ['push', 'gcr.io/$PROJECT_ID/kivo-backend:latest']
 
-  # Deploy to Cloud Run
+  # Step 3: Deploy to Cloud Run (kivo-core)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
-    args:
-      - 'run'
-      - 'deploy'
-      - 'kivo-service'
-      - '--image'
-      - 'gcr.io/alert-basis-134223/kivo-backend:latest'
-      - '--region'
-      - 'us-central1'
-      - '--platform'
-      - 'managed'
-      - '--allow-unauthenticated'
+    args: [
+      'run', 'deploy', 'kivo-core',
+      '--image', 'gcr.io/$PROJECT_ID/kivo-backend:latest',
+      '--region', 'us-central1',
+      '--platform', 'managed',
+      '--allow-unauthenticated'
+    ]
 
-options:
-  logging: CLOUD_LOGGING_ONLY
 images:
-  - 'gcr.io/alert-basis-134223/kivo-backend:latest'
+  - 'gcr.io/$PROJECT_ID/kivo-backend:latest'
+
